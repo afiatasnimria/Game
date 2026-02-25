@@ -1,3 +1,3 @@
 # Game
 ---
-# about us 
+# About us 
