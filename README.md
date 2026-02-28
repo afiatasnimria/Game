@@ -4,3 +4,4 @@
 My game
 ---
 # Tech Stack
+Frontend
