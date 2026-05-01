@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Easy Space Shooter</title>
+
+<style>
+body{
+    margin:0;
+    overflow:hidden;
+    background:black;
+    font-family:Arial,sans-serif;
+}
+canvas{
+    display:block;
+}
+#ui{
+    position:absolute;
+    top:20px;
+    left:20px;
+    color:white;
+    font-size:24px;
+}
+#gameOver{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+    display:none;
+    text-align:center;
+}
+button{
+    padding:10px 20px;
+    font-size:18px;
+}
+</style>
+</head>
+<body>
+
+<div id="ui">
+    Score: <span id="score">0</span><br>
+    Lives: <span id="lives">5</span>
+</div>
+
+<div id="gameOver">
+    <h1>Game Over</h1>
+    <button onclick="location.reload()">Restart</button>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = innerWidth;
+canvas.height = innerHeight;
+
+let score = 0;
+let lives = 5;
+let gameRunning = true;
+
+const bullets = [];
+const enemies = [];
+const stars = [];
+const keys = {};
+
+const player = {
+    x: canvas.width/2,
+    y: canvas.height-100,
+    width: 60,
+    height: 60,
+    velocityX: 0,
+    speed: 0.5,
+    maxSpeed: 5,
+    friction: 0.90
+};
+
+// background stars
+for(let i=0;i<100;i++){
+    stars.push({
+        x: Math.random()*canvas.width,
+        y: Math.random()*canvas.height
+    });
+}
+
+document.addEventListener("keydown",(e)=> keys[e.key]=true);
+document.addEventListener("keyup",(e)=> keys[e.key]=false);
+
+// auto shooting every 300ms
+setInterval(()=>{
+    if(gameRunning){
+        bullets.push({
+            x: player.x-4,
+            y: player.y-20,
+            width: 8,
+            height: 20
+        });
+    }
+},300);
+
+// easier enemy spawning
+setInterval(()=>{
+    if(gameRunning){
+        enemies.push({
+            x: Math.random()*(canvas.width-50),
+            y: -50,
+            width: 50,
+            height: 50,
+            speed: 2
+        });
+    }
+},1200);
+
+function drawStars(){
+    ctx.fillStyle="white";
+    stars.forEach(star=>{
+        star.y+=1;
+        if(star.y>canvas.height) star.y=0;
+        ctx.fillRect(star.x,star.y,2,2);
+    });
+}
+
+function movePlayer(){
+    if(keys["ArrowLeft"] || keys["a"]){
+        player.velocityX -= player.speed;
+    }
+
+    if(keys["ArrowRight"] || keys["d"]){
+        player.velocityX += player.speed;
+    }
+
+    // speed limit
+    if(player.velocityX > player.maxSpeed){
+        player.velocityX = player.maxSpeed;
+    }
+    if(player.velocityX < -player.maxSpeed){
+        player.velocityX = -player.maxSpeed;
+    }
+
+    // friction for smooth stop
+    player.velocityX *= player.friction;
+
+    player.x += player.velocityX;
+
+    // boundary
+    if(player.x < player.width/2){
+        player.x = player.width/2;
+    }
+
+    if(player.x > canvas.width-player.width/2){
+        player.x = canvas.width-player.width/2;
+    }
+}
+
+function drawPlayer(){
+    ctx.fillStyle="cyan";
+    ctx.beginPath();
+    ctx.moveTo(player.x,player.y-30);
+    ctx.lineTo(player.x-30,player.y+30);
+    ctx.lineTo(player.x+30,player.y+30);
+    ctx.fill();
+}
+
+function updateBullets(){
+    ctx.fillStyle="yellow";
+
+    for(let i=bullets.length-1;i>=0;i--){
+        bullets[i].y -= 8;
+
+        ctx.fillRect(
+            bullets[i].x,
+            bullets[i].y,
+            bullets[i].width,
+            bullets[i].height
+        );
+
+        if(bullets[i].y < 0){
+            bullets.splice(i,1);
+        }
+    }
+}
+
+function updateEnemies(){
+    ctx.fillStyle="red";
+
+    for(let i=enemies.length-1;i>=0;i--){
+        enemies[i].y += enemies[i].speed;
+
+        ctx.fillRect(
+            enemies[i].x,
+            enemies[i].y,
+            enemies[i].width,
+            enemies[i].height
+        );
+
+        if(enemies[i].y > canvas.height){
+            enemies.splice(i,1);
+            lives--;
+            updateUI();
+
+            if(lives<=0){
+                gameOver();
+            }
+        }
+
+        // collision with bullets
+        for(let j=bullets.length-1;j>=0;j--){
+            if(
+                bullets[j] &&
+                bullets[j].x < enemies[i].x + enemies[i].width &&
+                bullets[j].x + bullets[j].width > enemies[i].x &&
+                bullets[j].y < enemies[i].y + enemies[i].height &&
+                bullets[j].y + bullets[j].height > enemies[i].y
+            ){
+                bullets.splice(j,1);
+                enemies.splice(i,1);
+                score++;
+                updateUI();
+                break;
+            }
+        }
+    }
+}
+
+function updateUI(){
+    document.getElementById("score").innerText = score;
+    document.getElementById("lives").innerText = lives;
+}
+
+function gameOver(){
+    gameRunning=false;
+    document.getElementById("gameOver").style.display="block";
+}
+
+function gameLoop(){
+    if(!gameRunning) return;
+
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    drawStars();
+    movePlayer();
+    drawPlayer();
+    updateBullets();
+    updateEnemies();
+
+    requestAnimationFrame(gameLoop);
+}
+
+gameLoop();
+</script>
+
+</body>
+</html>
