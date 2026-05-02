@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Color Reaction Game</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:linear-gradient(135deg,#141e30,#243b55);
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    flex-direction:column;
+}
+
+#score{
+    font-size:28px;
+    margin-bottom:20px;
+}
+
+#word{
+    font-size:70px;
+    font-weight:bold;
+    margin:30px;
+}
+
+.buttons{
+    display:grid;
+    grid-template-columns:repeat(2,150px);
+    gap:20px;
+}
+
+button{
+    padding:20px;
+    font-size:22px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    transform:scale(1.08);
+}
+
+#timer{
+    margin-top:20px;
+    font-size:24px;
+}
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<div id="word">RED</div>
+
+<div class="buttons">
+    <button onclick="checkAnswer('red')" style="background:red">RED</button>
+    <button onclick="checkAnswer('blue')" style="background:blue;color:white;">BLUE</button>
+    <button onclick="checkAnswer('green')" style="background:green">GREEN</button>
+    <button onclick="checkAnswer('yellow')" style="background:gold">YELLOW</button>
+</div>
+
+<div id="timer">Time: 30</div>
+
+<script>
+const colors = ["red","blue","green","yellow"];
+const wordElement = document.getElementById("word");
+
+let correctColor = "";
+let score = 0;
+let timeLeft = 30;
+
+function nextRound(){
+    const randomWord =
+        colors[Math.floor(Math.random()*colors.length)];
+
+    correctColor =
+        colors[Math.floor(Math.random()*colors.length)];
+
+    wordElement.innerText = randomWord.toUpperCase();
+    wordElement.style.color = correctColor;
+}
+
+function checkAnswer(selected){
+    if(selected === correctColor){
+        score++;
+    }else{
+        score--;
+    }
+
+    document.getElementById("score").innerText =
+        "Score: " + score;
+
+    nextRound();
+}
+
+function timer(){
+    const gameTimer = setInterval(()=>{
+        timeLeft--;
+
+        document.getElementById("timer").innerText =
+            "Time: " + timeLeft;
+
+        if(timeLeft <= 0){
+            clearInterval(gameTimer);
+            alert("Game Over! Score: " + score);
+        }
+    },1000);
+}
+
+nextRound();
+timer();
+</script>
+
+</body>
+</html>
