@@ -11,11 +11,22 @@ body{
     font-family:Arial,sans-serif;
     background:linear-gradient(135deg,#141e30,#243b55);
     color:white;
+    min-height:100vh;
+}
+
+.container{
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
+    gap:50px;
+    padding:20px;
+}
+
+.game-section{
+    display:flex;
     flex-direction:column;
+    align-items:center;
 }
 
 #score{
@@ -52,21 +63,60 @@ button:hover{
     margin-top:20px;
     font-size:24px;
 }
+
+.rules{
+    width:320px;
+    background:rgba(255,255,255,0.1);
+    padding:25px;
+    border-radius:15px;
+    backdrop-filter:blur(8px);
+}
+
+.rules h2{
+    margin-top:0;
+    text-align:center;
+}
+
+.rules ul{
+    text-align:left;
+    line-height:1.8;
+    padding-left:20px;
+}
 </style>
 </head>
 <body>
 
-<div id="score">Score: 0</div>
-<div id="word">RED</div>
+<div class="container">
 
-<div class="buttons">
-    <button onclick="checkAnswer('red')" style="background:red">RED</button>
-    <button onclick="checkAnswer('blue')" style="background:blue;color:white;">BLUE</button>
-    <button onclick="checkAnswer('green')" style="background:green">GREEN</button>
-    <button onclick="checkAnswer('yellow')" style="background:gold">YELLOW</button>
+    <div class="game-section">
+        <div id="score">Score: 0</div>
+
+        <div id="word">RED</div>
+
+        <div class="buttons">
+            <button onclick="checkAnswer('red')" style="background:red">RED</button>
+            <button onclick="checkAnswer('blue')" style="background:blue;color:white;">BLUE</button>
+            <button onclick="checkAnswer('green')" style="background:green">GREEN</button>
+            <button onclick="checkAnswer('yellow')" style="background:gold">YELLOW</button>
+        </div>
+
+        <div id="timer">Time: 30</div>
+    </div>
+
+    <div class="rules">
+        <h2>Game Rules</h2>
+        <ul>
+            <li>Look at the color of the word, not the written text.</li>
+            <li>Choose the button that matches the text color.</li>
+            <li>Correct answer gives +1 point.</li>
+            <li>Wrong answer gives -1 point.</li>
+            <li>You have 30 seconds to score as much as possible.</li>
+            <li>Each round changes the word and its color.</li>
+            <li>React quickly and carefully.</li>
+        </ul>
+    </div>
+
 </div>
-
-<div id="timer">Time: 30</div>
 
 <script>
 const colors = ["red","blue","green","yellow"];
