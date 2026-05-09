@@ -10,8 +10,19 @@ body{
     margin:0;
     font-family:Arial,sans-serif;
     background:linear-gradient(to right,#56ab2f,#a8e063);
-    text-align:center;
     color:white;
+}
+
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:50px;
+    padding:30px;
+}
+
+.game-section{
+    text-align:center;
 }
 
 h1{
@@ -62,21 +73,61 @@ button{
     cursor:pointer;
     border:none;
     border-radius:8px;
+    background:#1f2937;
+    color:white;
+}
+
+.rules{
+    width:320px;
+    background:white;
+    color:black;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+.rules h2{
+    margin-top:0;
+}
+
+.rules ul{
+    text-align:left;
+    line-height:1.8;
+    padding-left:20px;
 }
 </style>
 </head>
 <body>
 
-<h1>Whack-a-Mole</h1>
+<div class="container">
 
-<div id="scoreboard">
-    Score: <span id="score">0</span> |
-    Time: <span id="time">30</span>
+    <div class="game-section">
+        <h1>Whack-a-Mole</h1>
+
+        <div id="scoreboard">
+            Score: <span id="score">0</span> |
+            Time: <span id="time">30</span>
+        </div>
+
+        <div class="grid" id="grid"></div>
+
+        <button onclick="startGame()">Restart</button>
+    </div>
+
+    <div class="rules">
+        <h2>Game Rules</h2>
+        <ul>
+            <li>Moles will appear randomly from holes.</li>
+            <li>Click on the mole before it disappears.</li>
+            <li>Each successful hit gives you 1 point.</li>
+            <li>You have 30 seconds to score as much as possible.</li>
+            <li>Moles change position every 0.7 seconds.</li>
+            <li>If you miss, no points are added.</li>
+            <li>Try to get the highest score before time runs out.</li>
+        </ul>
+    </div>
+
 </div>
-
-<div class="grid" id="grid"></div>
-
-<button onclick="startGame()">Restart</button>
 
 <script>
 const grid = document.getElementById("grid");
