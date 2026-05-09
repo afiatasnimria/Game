@@ -8,8 +8,20 @@
 <style>
 body{
     font-family: Arial, sans-serif;
-    text-align:center;
     background:#f5f6fa;
+    margin:0;
+}
+
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    gap:50px;
+    padding:30px;
+}
+
+.game-section{
+    text-align:center;
 }
 
 h1{
@@ -69,16 +81,58 @@ button{
     font-size:18px;
     cursor:pointer;
     margin:10px;
+    border:none;
+    border-radius:8px;
+    background:#2d3436;
+    color:white;
+}
+
+.rules{
+    width:320px;
+    background:white;
+    padding:25px;
+    border-radius:15px;
+    box-shadow:0 8px 20px rgba(0,0,0,0.15);
+}
+
+.rules h2{
+    margin-top:0;
+}
+
+.rules ul{
+    text-align:left;
+    line-height:1.8;
+    padding-left:20px;
 }
 </style>
 </head>
 <body>
 
-<h1>Smart Sudoku</h1>
+<div class="container">
 
-<div id="board"></div>
+    <div class="game-section">
+        <h1>Smart Sudoku</h1>
 
-<button onclick="resetGame()">Reset</button>
+        <div id="board"></div>
+
+        <button onclick="resetGame()">Reset</button>
+    </div>
+
+    <div class="rules">
+        <h2>Game Rules</h2>
+        <ul>
+            <li>Fill all empty boxes with numbers from 1 to 9.</li>
+            <li>Each row must contain numbers 1–9 without repeating.</li>
+            <li>Each column must contain numbers 1–9 without repeating.</li>
+            <li>Each 3×3 box must contain numbers 1–9 without repeating.</li>
+            <li>Gray cells are fixed and cannot be changed.</li>
+            <li>Correct inputs turn green.</li>
+            <li>Wrong inputs turn red.</li>
+            <li>Complete the board correctly to win.</li>
+        </ul>
+    </div>
+
+</div>
 
 <script>
 const puzzle = [
