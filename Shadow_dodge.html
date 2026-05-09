@@ -1,28 +1,124 @@
-
 <style>
-#g{display:flex;flex-direction:column;align-items:center;padding:1rem 0;font-family:var(--font-sans);user-select:none}
-#c{border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-lg);cursor:none;touch-action:none;display:block;max-width:100%}
-#h{display:flex;gap:24px;margin-bottom:10px;font-size:12px;color:var(--color-text-secondary);letter-spacing:.06em}
-#h b{color:var(--color-text-primary);font-weight:500}
-#info{font-size:12px;color:var(--color-text-tertiary);margin-top:8px}
-button{margin-top:10px}
+body{
+    margin:0;
+    display:flex;
+    font-family:Arial,sans-serif;
+}
+
+.wrapper{
+    display:flex;
+    width:100%;
+    min-height:100vh;
+}
+
+#g{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:1rem 0;
+    user-select:none;
+    background:#111;
+}
+
+#c{
+    border:1px solid #444;
+    border-radius:12px;
+    cursor:none;
+    touch-action:none;
+    display:block;
+    max-width:100%;
+}
+
+#h{
+    display:flex;
+    gap:24px;
+    margin-bottom:10px;
+    font-size:14px;
+    color:#ccc;
+}
+
+#h b{
+    color:white;
+    font-weight:bold;
+}
+
+#info{
+    font-size:13px;
+    color:#aaa;
+    margin-top:8px;
+}
+
+button{
+    margin-top:10px;
+    padding:10px 20px;
+    font-size:16px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.rules{
+    width:320px;
+    background:#1f2937;
+    color:white;
+    padding:25px;
+    border-left:3px solid #374151;
+}
+
+.rules h2{
+    margin-top:0;
+    text-align:center;
+}
+
+.rules ul{
+    line-height:1.8;
+    padding-left:20px;
+}
 </style>
+
+<div class="wrapper">
+
 <div id="g">
-<h2 class="sr-only">Pulse — dodge expanding rings using your mouse</h2>
+<h2 style="color:white;">Pulse</h2>
+
 <div id="h">
   <span>score <b id="sc">0</b></span>
   <span>best <b id="bst">0</b></span>
   <span>lives <b id="lv">♥♥♥</b></span>
   <span>wave <b id="wv">1</b></span>
 </div>
+
 <canvas id="c" width="600" height="360"></canvas>
+
 <div id="info">move mouse · dodge the rings</div>
+
 <button id="btn">play</button>
 </div>
+
+<div class="rules">
+    <h2>Game Rules</h2>
+    <ul>
+        <li>Move your mouse to control the player.</li>
+        <li>Avoid touching the expanding purple rings.</li>
+        <li>Touching a ring costs 1 life.</li>
+        <li>You start with 3 lives.</li>
+        <li>Green orbs give bonus points.</li>
+        <li>Surviving increases your score over time.</li>
+        <li>Higher waves make rings spawn faster.</li>
+        <li>Chain dodges create combo bonuses.</li>
+        <li>Game ends when all lives are lost.</li>
+    </ul>
+</div>
+
+</div>
+
 <script>
 const cv=document.getElementById('c'),ctx=cv.getContext('2d');
 const W=600,H=360;
 const $=id=>document.getElementById(id);
+
 let px=W/2,py=H/2,PR=7;
 let rings=[],sparks=[],orbs=[];
 let score=0,best=0,lives=3,wave=1,frame=0,inv=0,state='idle',raf;
@@ -32,218 +128,174 @@ function dark(){return matchMedia('(prefers-color-scheme:dark)').matches}
 
 function palette(){
   return dark()
-    ? {bg:'#111',player:'#fde68a',ring:'#818cf8',ringD:'#4f46e5',orb:'#34d399',spark:'#fde68a',grid:'rgba(255,255,255,0.03)',combo:'#f472b6'}
-    : {bg:'#fafaf9',player:'#b45309',ring:'#6366f1',ringD:'#3730a3',orb:'#059669',spark:'#d97706',grid:'rgba(0,0,0,0.04)',combo:'#db2777'}
+    ? {bg:'#111',player:'#fde68a',ring:'#818cf8',orb:'#34d399',spark:'#fde68a',grid:'rgba(255,255,255,0.03)',combo:'#f472b6'}
+    : {bg:'#fafaf9',player:'#b45309',ring:'#6366f1',orb:'#059669',spark:'#d97706',grid:'rgba(0,0,0,0.04)',combo:'#db2777'}
 }
 
 function spawnRing(){
-  const edge=Math.random()<.5?'top':'rand';
-  let sx,sy;
-  if(edge==='top'){sx=40+Math.random()*(W-80);sy=40+Math.random()*(H-80);}
-  else{
-    const s=Math.floor(Math.random()*4);
-    if(s===0){sx=Math.random()*W;sy=-20;}
-    else if(s===1){sx=W+20;sy=Math.random()*H;}
-    else if(s===2){sx=Math.random()*W;sy=H+20;}
-    else{sx=-20;sy=Math.random()*H;}
-  }
+  let sx=Math.random()*W;
+  let sy=Math.random()*H;
   const spd=(1.2+wave*0.3)*(0.8+Math.random()*0.5);
-  const big=Math.random()<0.2+wave*0.05;
-  rings.push({x:sx,y:sy,r:0,maxR:big?90:55,spd,born:frame,thick:big?3:2,alive:true,scored:false,color:Math.random()<0.3?'orb':'ring'});
+  rings.push({x:sx,y:sy,r:0,maxR:55,spd,alive:true});
 }
 
 function spawnOrb(){
   orbs.push({x:Math.random()*W,y:Math.random()*H,r:6,life:240,born:frame});
 }
 
-function addSparks(x,y,col,n=8){
-  for(let i=0;i<n;i++){
-    const a=Math.random()*Math.PI*2,s=1+Math.random()*3;
-    sparks.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:1,color:col});
+function drawGrid(){
+  const p=palette();
+  ctx.strokeStyle=p.grid;
+  for(let x=0;x<=W;x+=40){
+    ctx.beginPath();
+    ctx.moveTo(x,0);
+    ctx.lineTo(x,H);
+    ctx.stroke();
+  }
+  for(let y=0;y<=H;y+=40){
+    ctx.beginPath();
+    ctx.moveTo(0,y);
+    ctx.lineTo(W,y);
+    ctx.stroke();
   }
 }
 
-function drawGrid(){
-  const p=palette();
-  ctx.strokeStyle=p.grid;ctx.lineWidth=.5;
-  for(let x=0;x<=W;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
-  for(let y=0;y<=H;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-}
-
 function drawPlayer(){
-  if(inv>0&&Math.floor(inv/5)%2===0)return;
   const p=palette();
-  ctx.beginPath();ctx.arc(px,py,PR+5,0,Math.PI*2);
-  ctx.fillStyle=dark()?'rgba(253,230,138,0.15)':'rgba(180,83,9,0.12)';ctx.fill();
-  ctx.beginPath();ctx.arc(px,py,PR,0,Math.PI*2);
-  ctx.fillStyle=p.player;ctx.fill();
-  const pulse=(Math.sin(frame*0.12)+1)/2;
-  ctx.beginPath();ctx.arc(px,py,PR+2+pulse*3,0,Math.PI*2);
-  ctx.strokeStyle=dark()?'rgba(253,230,138,0.3)':'rgba(180,83,9,0.2)';
-  ctx.lineWidth=1;ctx.stroke();
+  ctx.beginPath();
+  ctx.arc(px,py,PR,0,Math.PI*2);
+  ctx.fillStyle=p.player;
+  ctx.fill();
 }
 
 function drawRings(){
   const p=palette();
   for(const r of rings){
-    if(!r.alive)continue;
-    const progress=r.r/r.maxR;
-    const alpha=Math.max(0,1-progress*progress);
-    ctx.globalAlpha=alpha;
-    ctx.beginPath();ctx.arc(r.x,r.y,r.r,0,Math.PI*2);
-    ctx.strokeStyle=r.color==='orb'?p.orb:p.ring;
-    ctx.lineWidth=r.thick;ctx.stroke();
-    if(r.r>8){
-      ctx.beginPath();ctx.arc(r.x,r.y,r.r-r.thick-1,0,Math.PI*2);
-      ctx.strokeStyle=r.color==='orb'?'rgba(52,211,153,0.2)':'rgba(99,102,241,0.15)';
-      ctx.lineWidth=1;ctx.stroke();
-    }
-    ctx.globalAlpha=1;
+    ctx.beginPath();
+    ctx.arc(r.x,r.y,r.r,0,Math.PI*2);
+    ctx.strokeStyle=p.ring;
+    ctx.lineWidth=2;
+    ctx.stroke();
   }
 }
 
 function drawOrbs(){
   const p=palette();
   for(const o of orbs){
-    const age=frame-o.born;
-    const pulse=(Math.sin(age*0.15)+1)/2;
-    ctx.beginPath();ctx.arc(o.x,o.y,o.r+pulse*3,0,Math.PI*2);
-    ctx.strokeStyle=p.orb;ctx.lineWidth=1;ctx.stroke();
-    ctx.beginPath();ctx.arc(o.x,o.y,o.r,0,Math.PI*2);
-    ctx.fillStyle=p.orb;ctx.fill();
+    ctx.beginPath();
+    ctx.arc(o.x,o.y,o.r,0,Math.PI*2);
+    ctx.fillStyle=p.orb;
+    ctx.fill();
   }
 }
-
-function drawSparks(){
-  for(const s of sparks){
-    ctx.globalAlpha=s.life;
-    ctx.beginPath();ctx.arc(s.x,s.y,2.5*s.life,0,Math.PI*2);
-    ctx.fillStyle=s.color;ctx.fill();
-    ctx.globalAlpha=1;
-    s.x+=s.vx;s.y+=s.vy;s.vy+=0.08;s.life-=0.04;
-  }
-  sparks=sparks.filter(s=>s.life>0);
-}
-
-function drawCombo(n){
-  if(n<2)return;
-  const p=palette();
-  ctx.save();
-  ctx.globalAlpha=Math.min(1,(n-1)*0.3);
-  ctx.font=`500 ${12+n*2}px var(--font-sans)`;
-  ctx.fillStyle=p.combo;
-  ctx.textAlign='center';
-  ctx.fillText('x'+n,px,py-20);
-  ctx.restore();
-}
-
-let combo=0,comboTimer=0;
 
 function loop(){
-  if(state!=='playing')return;
+  if(state!=='playing') return;
+
   frame++;
   const p=palette();
 
-  ctx.fillStyle=p.bg;ctx.fillRect(0,0,W,H);
+  ctx.fillStyle=p.bg;
+  ctx.fillRect(0,0,W,H);
+
   drawGrid();
 
-  const rate=Math.max(25,70-wave*7);
-  if(frame%rate===0)spawnRing();
-  if(frame%180===0)spawnOrb();
+  if(frame%70===0) spawnRing();
+  if(frame%180===0) spawnOrb();
 
   for(const r of rings){
-    if(!r.alive)continue;
     r.r+=r.spd;
-    if(r.r>=r.maxR){r.alive=false;if(!r.scored)combo=0;}
-  }
-  rings=rings.filter(r=>r.alive);
 
-  for(const o of orbs){
-    const d=Math.hypot(px-o.x,py-o.y);
-    if(d<PR+o.r){addSparks(o.x,o.y,p.orb,12);o.life=-1;score+=10+wave;}
-  }
-  orbs=orbs.filter(o=>o.life>0&&frame-o.born<o.life);
+    let d=Math.hypot(px-r.x,py-r.y);
 
-  if(inv>0)inv--;
-  score++;
-  $('sc').textContent=score;
-  if(score%400===0){wave++;$('wv').textContent=wave;}
+    if(Math.abs(d-r.r)<PR+2 && inv===0){
+      lives--;
+      $('lv').textContent=HEARTS[Math.max(0,3-lives)];
+      inv=60;
 
-  if(comboTimer>0)comboTimer--;
-  else if(comboTimer===0)combo=0;
-
-  if(inv===0){
-    for(const r of rings){
-      if(!r.alive)continue;
-      const d=Math.hypot(px-r.x,py-r.y);
-      const hit=Math.abs(d-r.r)<PR+r.thick+1;
-      if(hit&&!r.scored){
-        r.scored=true;combo++;comboTimer=60;
-        score+=combo*5;
-      }
-      if(hit&&r.color!=='orb'&&inv===0){
-        addSparks(px,py,p.spark,6);
-        lives--;$('lv').textContent=HEARTS[Math.max(0,3-lives)];
-        inv=80;
-        if(lives<=0){gameOver();return;}
+      if(lives<=0){
+        gameOver();
+        return;
       }
     }
   }
 
+  rings=rings.filter(r=>r.r<r.maxR);
+
+  for(const o of orbs){
+    let d=Math.hypot(px-o.x,py-o.y);
+
+    if(d<PR+o.r){
+      score+=10;
+      o.life=0;
+    }
+  }
+
+  orbs=orbs.filter(o=>o.life>0);
+
+  if(inv>0) inv--;
+
+  score++;
+  $('sc').textContent=score;
+
+  if(score>best){
+    best=score;
+    $('bst').textContent=best;
+  }
+
+  if(score%400===0){
+    wave++;
+    $('wv').textContent=wave;
+  }
+
   drawOrbs();
   drawRings();
-  drawSparks();
   drawPlayer();
-  drawCombo(combo);
 
-  if(score>best){best=score;$('bst').textContent=best;}
   raf=requestAnimationFrame(loop);
 }
 
 function gameOver(){
   state='over';
   cancelAnimationFrame(raf);
-  const p=palette();
-  ctx.fillStyle=dark()?'rgba(0,0,0,0.7)':'rgba(250,250,249,0.75)';
+
+  ctx.fillStyle='rgba(0,0,0,0.7)';
   ctx.fillRect(0,0,W,H);
-  ctx.fillStyle=p.ring;
-  ctx.font='500 22px var(--font-sans)';
+
+  ctx.fillStyle='white';
+  ctx.font='30px Arial';
   ctx.textAlign='center';
-  ctx.fillText('ring out',W/2,H/2-16);
-  ctx.fillStyle=dark()?'#aaa':'#888';
-  ctx.font='400 13px var(--font-sans)';
-  ctx.fillText('score '+score+' · best '+best,W/2,H/2+12);
-  $('btn').textContent='retry';
-  $('info').textContent='you hit a ring';
+  ctx.fillText('Game Over',W/2,H/2);
 }
 
 function start(){
-  state='playing';score=0;lives=3;wave=1;frame=0;inv=0;combo=0;comboTimer=0;
-  rings=[];sparks=[];orbs=[];
-  $('sc').textContent=0;$('lv').textContent=HEARTS[0];$('wv').textContent=1;
-  $('btn').textContent='restart';
-  $('info').textContent='move mouse · dodge the rings · collect green orbs';
-  cancelAnimationFrame(raf);loop();
+  state='playing';
+  score=0;
+  lives=3;
+  wave=1;
+  frame=0;
+  inv=0;
+  rings=[];
+  orbs=[];
+
+  $('sc').textContent=0;
+  $('lv').textContent='♥♥♥';
+  $('wv').textContent=1;
+
+  cancelAnimationFrame(raf);
+  loop();
 }
 
 cv.addEventListener('mousemove',e=>{
   const r=cv.getBoundingClientRect();
-  px=Math.max(PR,Math.min(W-PR,(e.clientX-r.left)*(W/r.width)));
-  py=Math.max(PR,Math.min(H-PR,(e.clientY-r.top)*(H/r.height)));
+  px=(e.clientX-r.left)*(W/r.width);
+  py=(e.clientY-r.top)*(H/r.height);
 });
-cv.addEventListener('touchmove',e=>{
-  e.preventDefault();
-  const r=cv.getBoundingClientRect();
-  px=Math.max(PR,Math.min(W-PR,(e.touches[0].clientX-r.left)*(W/r.width)));
-  py=Math.max(PR,Math.min(H-PR,(e.touches[0].clientY-r.top)*(H/r.height)));
-},{passive:false});
 
 $('btn').addEventListener('click',start);
 
 const p=palette();
-ctx.fillStyle=p.bg;ctx.fillRect(0,0,W,H);
+ctx.fillStyle=p.bg;
+ctx.fillRect(0,0,W,H);
 drawGrid();
-ctx.fillStyle=dark()?'rgba(255,255,255,0.15)':'rgba(0,0,0,0.12)';
-ctx.font='400 14px var(--font-sans)';ctx.textAlign='center';
-ctx.fillText('dodge expanding rings · collect green orbs',W/2,H/2);
 </script>
