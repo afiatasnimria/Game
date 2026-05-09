@@ -10,12 +10,21 @@ body{
     margin:0;
     font-family:Arial, sans-serif;
     background:linear-gradient(135deg,#1d2671,#c33764);
+    min-height:100vh;
+    color:white;
+}
+
+.container{
     display:flex;
     justify-content:center;
     align-items:center;
     min-height:100vh;
-    flex-direction:column;
-    color:white;
+    gap:50px;
+    padding:20px;
+}
+
+.game-section{
+    text-align:center;
 }
 
 h1{
@@ -69,18 +78,57 @@ button{
     font-size:18px;
     cursor:pointer;
 }
+
+.rules{
+    width:320px;
+    background:rgba(255,255,255,0.12);
+    padding:25px;
+    border-radius:15px;
+    backdrop-filter:blur(8px);
+}
+
+.rules h2{
+    margin-top:0;
+    text-align:center;
+}
+
+.rules ul{
+    text-align:left;
+    line-height:1.8;
+    padding-left:20px;
+}
 </style>
 </head>
 <body>
 
-<h1>Memory Match Game</h1>
-<div id="stats">
-    Moves: <span id="moves">0</span>
+<div class="container">
+
+    <div class="game-section">
+        <h1>Memory Match Game</h1>
+
+        <div id="stats">
+            Moves: <span id="moves">0</span>
+        </div>
+
+        <div class="game-board" id="board"></div>
+
+        <button onclick="startGame()">Restart</button>
+    </div>
+
+    <div class="rules">
+        <h2>Game Rules</h2>
+        <ul>
+            <li>Click a card to reveal its emoji.</li>
+            <li>You can flip only 2 cards at a time.</li>
+            <li>If both cards match, they stay open.</li>
+            <li>If they do not match, they flip back.</li>
+            <li>Each pair attempt counts as 1 move.</li>
+            <li>Find all matching pairs to win.</li>
+            <li>Try to complete the game in fewer moves.</li>
+        </ul>
+    </div>
+
 </div>
-
-<div class="game-board" id="board"></div>
-
-<button onclick="startGame()">Restart</button>
 
 <script>
 const emojis = ["🍎","🍌","🍇","🍉","🍒","🥝","🍍","🍑"];
