@@ -11,17 +11,27 @@ body{
     overflow:hidden;
     background:black;
     font-family:Arial,sans-serif;
+    display:flex;
 }
+
+.game-container{
+    position:relative;
+    flex:1;
+}
+
 canvas{
     display:block;
 }
+
 #ui{
     position:absolute;
     top:20px;
     left:20px;
     color:white;
     font-size:24px;
+    z-index:10;
 }
+
 #gameOver{
     position:absolute;
     top:50%;
@@ -30,33 +40,76 @@ canvas{
     color:white;
     display:none;
     text-align:center;
+    z-index:10;
 }
+
 button{
     padding:10px 20px;
     font-size:18px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+}
+
+.rules{
+    width:320px;
+    background:#111827;
+    color:white;
+    padding:25px;
+    border-left:3px solid #374151;
+    height:100vh;
+    box-sizing:border-box;
+}
+
+.rules h2{
+    margin-top:0;
+    text-align:center;
+}
+
+.rules ul{
+    line-height:1.8;
+    padding-left:20px;
 }
 </style>
 </head>
 <body>
 
-<div id="ui">
-    Score: <span id="score">0</span><br>
-    Lives: <span id="lives">5</span>
+<div class="game-container">
+
+    <div id="ui">
+        Score: <span id="score">0</span><br>
+        Lives: <span id="lives">5</span>
+    </div>
+
+    <div id="gameOver">
+        <h1>Game Over</h1>
+        <button onclick="location.reload()">Restart</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
 </div>
 
-<div id="gameOver">
-    <h1>Game Over</h1>
-    <button onclick="location.reload()">Restart</button>
+<div class="rules">
+    <h2>Game Rules</h2>
+    <ul>
+        <li>Control your spaceship using Left Arrow / A and Right Arrow / D.</li>
+        <li>Your ship shoots automatically every 300ms.</li>
+        <li>Destroy enemy ships to gain points.</li>
+        <li>Each destroyed enemy gives +1 score.</li>
+        <li>If an enemy reaches the bottom, you lose 1 life.</li>
+        <li>You start with 5 lives.</li>
+        <li>The game ends when all lives are lost.</li>
+        <li>Try to survive and get the highest score.</li>
+    </ul>
 </div>
-
-<canvas id="canvas"></canvas>
 
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
-canvas.width = innerWidth;
-canvas.height = innerHeight;
+canvas.width = window.innerWidth - 320;
+canvas.height = window.innerHeight;
 
 let score = 0;
 let lives = 5;
@@ -78,7 +131,6 @@ const player = {
     friction: 0.90
 };
 
-// background stars
 for(let i=0;i<100;i++){
     stars.push({
         x: Math.random()*canvas.width,
@@ -89,7 +141,6 @@ for(let i=0;i<100;i++){
 document.addEventListener("keydown",(e)=> keys[e.key]=true);
 document.addEventListener("keyup",(e)=> keys[e.key]=false);
 
-// auto shooting every 300ms
 setInterval(()=>{
     if(gameRunning){
         bullets.push({
@@ -101,7 +152,6 @@ setInterval(()=>{
     }
 },300);
 
-// easier enemy spawning
 setInterval(()=>{
     if(gameRunning){
         enemies.push({
@@ -132,20 +182,17 @@ function movePlayer(){
         player.velocityX += player.speed;
     }
 
-    // speed limit
     if(player.velocityX > player.maxSpeed){
         player.velocityX = player.maxSpeed;
     }
+
     if(player.velocityX < -player.maxSpeed){
         player.velocityX = -player.maxSpeed;
     }
 
-    // friction for smooth stop
     player.velocityX *= player.friction;
-
     player.x += player.velocityX;
 
-    // boundary
     if(player.x < player.width/2){
         player.x = player.width/2;
     }
@@ -206,7 +253,6 @@ function updateEnemies(){
             }
         }
 
-        // collision with bullets
         for(let j=bullets.length-1;j>=0;j--){
             if(
                 bullets[j] &&
