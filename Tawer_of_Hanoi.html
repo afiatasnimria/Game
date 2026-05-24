@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tower of Hanoi - 6 Disks</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background: radial-gradient(circle at top,#1e3a8a,#020617);
+    color:white;
+}
+
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
+    gap:50px;
+    padding:20px;
+}
+
+.game-section{
+    text-align:center;
+}
+
+h1{
+    font-size:40px;
+    margin-bottom:10px;
+    text-shadow:0 0 15px cyan;
+}
+
+#stats{
+    font-size:20px;
+    margin-bottom:20px;
+    background:rgba(255,255,255,0.08);
+    padding:10px 20px;
+    border-radius:12px;
+    display:inline-block;
+}
+
+.game{
+    display:flex;
+    justify-content:center;
+    align-items:flex-end;
+    gap:45px;
+    height:500px;
+}
+
+.tower{
+    width:220px;
+    height:430px;
+    position:relative;
+    border-radius:20px;
+    background:rgba(255,255,255,0.06);
+    border:2px solid rgba(255,255,255,0.15);
+    display:flex;
+    flex-direction:column-reverse;
+    align-items:center;
+    padding-bottom:25px;
+    cursor:pointer;
+}
+
+.rod{
+    width:12px;
+    height:320px;
+    background:#cbd5e1;
+    position:absolute;
+    bottom:20px;
+    border-radius:10px;
+}
+
+.base{
+    width:180px;
+    height:18px;
+    background:#475569;
+    position:absolute;
+    bottom:15px;
+    border-radius:10px;
+}
+
+.disk{
+    height:34px;
+    border-radius:18px;
+    margin:5px 0;
+    text-align:center;
+    line-height:34px;
+    font-weight:bold;
+    color:white;
+    transition:0.25s;
+    box-shadow:0 0 10px rgba(255,255,255,0.2);
+}
+
+.disk.selected{
+    outline:4px solid yellow;
+    transform:scale(1.08);
+    box-shadow:0 0 20px yellow;
+}
+
+button{
+    margin-top:20px;
+    padding:12px 25px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(to right,#06b6d4,#3b82f6);
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+/* RULES PANEL */
+.rules{
+    width:320px;
+    background:rgba(255,255,255,0.08);
+    padding:25px;
+    border-radius:15px;
+    backdrop-filter:blur(10px);
+}
+
+.rules h2{
+    margin-top:0;
+    text-align:center;
+    color:cyan;
+}
+
+.rules ul{
+    line-height:2;
+    padding-left:20px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="game-section">
+
+<h1>🗼 Tower of Hanoi</h1>
+
+<div id="stats">
+    Moves: <span id="moves">0</span>
+</div>
+
+<div class="game">
+    <div class="tower" onclick="selectTower(0)"><div class="base"></div><div class="rod"></div></div>
+    <div class="tower" onclick="selectTower(1)"><div class="base"></div><div class="rod"></div></div>
+    <div class="tower" onclick="selectTower(2)"><div class="base"></div><div class="rod"></div></div>
+</div>
+
+<button onclick="resetGame()">Restart</button>
+
+</div>
+
+<!-- RULES -->
+<div class="rules">
+<h2>🎮 Game Rules</h2>
+<ul>
+    <li>Move all 6 disks to the last tower.</li>
+    <li>Only one disk can be moved at a time.</li>
+    <li>You can only move the top disk.</li>
+    <li>Larger disk cannot go on smaller disk.</li>
+    <li>Click one tower to pick a disk.</li>
+    <li>Click another tower to place it.</li>
+    <li>Try to solve in minimum moves.</li>
+</ul>
+</div>
+
+</div>
+
+<script>
+let towers = [[6,5,4,3,2,1],[],[]];
+let selectedTower = null;
+let moves = 0;
+
+const colors = ["#ef4444","#f97316","#eab308","#22c55e","#3b82f6","#a855f7"];
+
+function render(){
+
+    for(let i=0;i<3;i++){
+        const tower = document.getElementsByClassName("tower")[i];
+
+        tower.querySelectorAll(".disk").forEach(d => d.remove());
+
+        towers[i].forEach((size, idx) => {
+            const disk = document.createElement("div");
+            disk.classList.add("disk");
+
+            disk.style.width = (60 + size*22) + "px";
+            disk.style.background = colors[size-1];
+            disk.innerText = size;
+
+            if(i === selectedTower && idx === towers[i].length - 1){
+                disk.classList.add("selected");
+            }
+
+            tower.appendChild(disk);
+        });
+    }
+
+    document.getElementById("moves").innerText = moves;
+}
+
+function selectTower(index){
+
+    if(selectedTower === null){
+        if(towers[index].length > 0){
+            selectedTower = index;
+        }
+    }else{
+        moveDisk(selectedTower,index);
+        selectedTower = null;
+    }
+
+    render();
+}
+
+function moveDisk(from,to){
+
+    if(from === to) return;
+
+    const disk = towers[from][towers[from].length - 1];
+    const target = towers[to][towers[to].length - 1];
+
+    if(towers[to].length === 0 || disk < target){
+        towers[from].pop();
+        towers[to].push(disk);
+        moves++;
+    }
+}
+
+function resetGame(){
+    towers = [[6,5,4,3,2,1],[],[]];
+    selectedTower = null;
+    moves = 0;
+    render();
+}
+
+render();
+</script>
+
+</body>
+</html>
