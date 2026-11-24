@@ -1,6 +1,6 @@
 # 🎮 Mini Games Collection
 
-A collection of fun browser-based mini games built with **HTML, CSS, and JavaScript**.
+A collection of fun browser-based mini games built with **HTML, CSS, and JavaScript**. Using basic coding I tried to build some intresting games.
 
 ## 📌 About
 This repository contains multiple interactive mini games designed for fun, practice, and improving JavaScript logic-building skills.
